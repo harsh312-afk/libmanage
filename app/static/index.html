@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Libraria — Modern Full-Stack Library Management</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-icon">📚</div>
+      <div class="brand-text">
+        <h1>Libraria</h1>
+        <span>Library Management System</span>
+      </div>
+    </div>
+
+    <ul class="nav-menu">
+      <li>
+        <button class="nav-item active" data-tab="dashboard">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-tab="catalog">
+          <span class="nav-icon">📖</span>
+          <span>Book Catalog</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-tab="circulation">
+          <span class="nav-icon">🔄</span>
+          <span>Circulation & Loans</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-tab="members">
+          <span class="nav-icon">👥</span>
+          <span>Patron Directory</span>
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-tab="analytics">
+          <span class="nav-icon">📈</span>
+          <span>Reports & Export</span>
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div>FastAPI + SQLAlchemy 2.0</div>
+      <div style="font-size:0.725rem; color:#64748b;">SQLite • Modern Web UI</div>
+    </div>
+  </aside>
+
+  <!-- App Container -->
+  <div class="app-container">
+
+    <!-- Top Navigation Bar -->
+    <header class="top-bar">
+      <h2 id="page-title" class="page-title">Library Overview & Metrics</h2>
+
+      <div class="top-actions">
+        <!-- Quick Action: Add Book (Admin) -->
+        <button class="btn btn-primary btn-sm admin-only" onclick="openAddBook()" style="display:none;">
+          <span>➕</span> Add Book
+        </button>
+
+        <!-- Theme Toggle -->
+        <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+          🌙
+        </button>
+
+        <!-- Current User Badge -->
+        <div id="current-user-badge" class="user-badge" style="display:none;">
+          <div id="user-avatar-initial" class="avatar">U</div>
+          <div>
+            <div id="user-name-display" style="font-weight:600; line-height:1.2;">User</div>
+            <div id="user-role-display" style="font-size:0.7rem; color:var(--text-muted); font-weight:700;">MEMBER</div>
+          </div>
+        </div>
+
+        <!-- Auth Button -->
+        <button id="auth-btn" class="btn btn-secondary btn-sm" onclick="openModal('modal-login')">
+          Sign In
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main>
+
+      <!-- 1. DASHBOARD VIEW -->
+      <section id="view-dashboard" class="main-view active">
+        <!-- KPI Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-info">
+              <span>Total Titles</span>
+              <h3 id="stat-total-books">0</h3>
+            </div>
+            <div class="stat-icon-wrapper icon-blue">📚</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <span>Total Inventory Copies</span>
+              <h3 id="stat-total-copies">0</h3>
+            </div>
+            <div class="stat-icon-wrapper icon-green">📦</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <span>Currently Loaned</span>
+              <h3 id="stat-issued">0</h3>
+            </div>
+            <div class="stat-icon-wrapper icon-amber">📤</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <span>Registered Patrons</span>
+              <h3 id="stat-members">0</h3>
+            </div>
+            <div class="stat-icon-wrapper icon-blue">👥</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <span>Overdue Loans</span>
+              <h3 id="stat-overdue">0</h3>
+            </div>
+            <div class="stat-icon-wrapper icon-rose">⚠️</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <span>Fines Collected</span>
+              <h3 id="stat-fines">$0.00</h3>
+            </div>
+            <div class="stat-icon-wrapper icon-green">💵</div>
+          </div>
+        </div>
+
+        <!-- Split Grid: Recent Activity & Categories -->
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem;">
+          
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Recent Circulation Activity</span>
+              <button class="btn btn-secondary btn-sm" onclick="switchTab('circulation')">View All Loans →</button>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Book Title</th>
+                      <th>Patron</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recent-activity-tbody">
+                    <!-- Loaded dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Genre Distribution</span>
+              <button class="btn btn-secondary btn-sm" onclick="switchTab('catalog')">Browse</button>
+            </div>
+            <div class="card-body" id="dashboard-categories-list">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 2. CATALOG VIEW -->
+      <section id="view-catalog" class="main-view">
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="search" id="catalog-search-input" placeholder="Search by title, author, or ISBN...">
+          </div>
+
+          <div class="filter-group">
+            <select id="catalog-category-filter" class="select-input" onchange="searchBooks()">
+              <option value="">All Categories</option>
+            </select>
+
+            <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.875rem; cursor:pointer;">
+              <input type="checkbox" id="catalog-available-only" onchange="searchBooks()">
+              <span>In Stock Only</span>
+            </label>
+
+            <button class="btn btn-primary btn-sm admin-only" onclick="openAddBook()" style="display:none;">
+              ➕ Add Book
+            </button>
+          </div>
+        </div>
+
+        <div id="book-grid-container" class="book-grid">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- 3. CIRCULATION VIEW -->
+      <section id="view-circulation" class="main-view">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Circulation & Loan Records</span>
+            <div class="filter-group">
+              <label for="circulation-status-filter" style="font-size:0.85rem; font-weight:600;">Status:</label>
+              <select id="circulation-status-filter" class="select-input" onchange="loadCirculation()">
+                <option value="all">All Records</option>
+                <option value="borrowed">Active Loans</option>
+                <option value="overdue">Overdue Only</option>
+                <option value="returned">Returned History</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Loan #</th>
+                    <th>Book Details</th>
+                    <th>Borrower</th>
+                    <th>Issue Date</th>
+                    <th>Due Date</th>
+                    <th>Status & Fine</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="circulation-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. MEMBERS VIEW -->
+      <section id="view-members" class="main-view">
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="search" id="members-search-input" placeholder="Search patrons by name, email, or card number...">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAddMember()">
+            ➕ Register Patron
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Patron Name</th>
+                    <th>Library Card #</th>
+                    <th>Email Address</th>
+                    <th>Phone</th>
+                    <th>Active Loans</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="members-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. ANALYTICS & EXPORT VIEW -->
+      <section id="view-analytics" class="main-view">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Export Library Reports</span>
+          </div>
+          <div class="card-body" style="display:flex; gap:1rem; flex-wrap:wrap;">
+            <div style="flex:1; min-width:260px; padding:1.25rem; border:1px solid var(--border-color); border-radius:8px;">
+              <h4>Catalog Inventory Report</h4>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0 1rem 0;">
+                Export all books, ISBNs, shelf locations, and total copy counts in CSV format.
+              </p>
+              <button class="btn btn-primary btn-sm" onclick="exportData('books')">📥 Download Books CSV</button>
+            </div>
+
+            <div style="flex:1; min-width:260px; padding:1.25rem; border:1px solid var(--border-color); border-radius:8px;">
+              <h4>Circulation & Fines Audit</h4>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0 1rem 0;">
+                Export historical borrow records, return dates, overdue calculations, and fine payment status.
+              </p>
+              <button class="btn btn-primary btn-sm" onclick="exportData('borrows')">📥 Download Circulation CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Catalog Breakdown by Category</span>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Category / Genre</th>
+                    <th>Number of Titles</th>
+                    <th>Percentage of Collection</th>
+                  </tr>
+                </thead>
+                <tbody id="analytics-category-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- MODALS (Native <dialog>) -->
+
+  <!-- Modal: Sign In & Quick Demo Switcher -->
+  <dialog id="modal-login">
+    <div class="modal-header">
+      <h3>Sign In to Libraria</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-login')">&times;</button>
+    </div>
+    <form id="login-form">
+      <div class="modal-body">
+        <div style="background:var(--primary-light); padding:0.85rem; border-radius:8px; margin-bottom:1.25rem; font-size:0.825rem;">
+          <strong>⚡ Quick Demo Accounts:</strong>
+          <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="quickLogin('admin')">Login as Admin</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('member')">Login as Patron</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" class="form-control" placeholder="admin@library.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-login')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Sign In</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: Book Detail View -->
+  <dialog id="modal-book-detail" style="max-width:640px;">
+    <div class="modal-header">
+      <h3 id="detail-book-title">Book Details</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-book-detail')">&times;</button>
+    </div>
+    <div class="modal-body" style="display:flex; gap:1.5rem; flex-wrap:wrap;">
+      <div style="width:160px; height:230px; flex-shrink:0; border-radius:8px; overflow:hidden; background:#1e293b;">
+        <img id="detail-book-cover" src="" alt="Book Cover" style="width:100%; height:100%; object-fit:cover;">
+      </div>
+      <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:0.4rem; font-size:0.9rem;">
+        <p id="detail-book-author" style="font-weight:600; color:var(--text-muted);"></p>
+        <p><strong>ISBN:</strong> <span id="detail-book-isbn"></span></p>
+        <p><strong>Genre:</strong> <span id="detail-book-category"></span></p>
+        <p><strong>Publication Year:</strong> <span id="detail-book-year"></span></p>
+        <p><strong>Shelf Location:</strong> <span id="detail-book-location"></span></p>
+        <p><strong>Stock Status:</strong> <span id="detail-book-copies" style="font-weight:600; color:var(--success);"></span></p>
+        <hr style="border:none; border-top:1px solid var(--border-color); margin:0.5rem 0;">
+        <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.4;" id="detail-book-desc"></p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('modal-book-detail')">Close</button>
+      <button type="button" id="detail-issue-btn" class="btn btn-primary">Issue Book</button>
+    </div>
+  </dialog>
+
+  <!-- Modal: Add / Edit Book (Admin) -->
+  <dialog id="modal-book" style="max-width:600px;">
+    <div class="modal-header">
+      <h3 id="book-modal-title">Add New Book</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-book')">&times;</button>
+    </div>
+    <form id="book-form">
+      <input type="hidden" id="book-id-input">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="book-title-input">Book Title *</label>
+          <input type="text" id="book-title-input" class="form-control" required placeholder="e.g. Clean Code">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="book-author-input">Author *</label>
+            <input type="text" id="book-author-input" class="form-control" required placeholder="Robert C. Martin">
+          </div>
+          <div class="form-group">
+            <label for="book-isbn-input">ISBN *</label>
+            <input type="text" id="book-isbn-input" class="form-control" required placeholder="978-0132350884">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="book-form-category">Category / Genre *</label>
+            <select id="book-form-category" class="form-control" required></select>
+          </div>
+          <div class="form-group">
+            <label for="book-year-input">Publication Year</label>
+            <input type="number" id="book-year-input" class="form-control" placeholder="2024">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="book-copies-input">Total Copies in Inventory *</label>
+            <input type="number" id="book-copies-input" class="form-control" min="1" value="3" required>
+          </div>
+          <div class="form-group">
+            <label for="book-location-input">Shelf Location *</label>
+            <input type="text" id="book-location-input" class="form-control" value="Rack CS-1" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="book-cover-input">Cover Image URL (optional)</label>
+          <input type="url" id="book-cover-input" class="form-control" placeholder="https://images.unsplash.com/...">
+        </div>
+        <div class="form-group">
+          <label for="book-desc-input">Description / Summary</label>
+          <textarea id="book-desc-input" class="form-control" rows="3" placeholder="Brief summary of the book..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-book')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Book</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: Issue Book -->
+  <dialog id="modal-issue">
+    <div class="modal-header">
+      <h3>Issue Book (Checkout)</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-issue')">&times;</button>
+    </div>
+    <form id="issue-form">
+      <input type="hidden" id="issue-book-id">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="issue-member-id">Select Patron *</label>
+          <select id="issue-member-id" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label for="issue-days">Loan Duration (Days)</label>
+          <input type="number" id="issue-days" class="form-control" value="14" min="1" max="90" required>
+        </div>
+        <div class="form-group">
+          <label for="issue-notes">Circulation Notes (optional)</label>
+          <input type="text" id="issue-notes" class="form-control" placeholder="e.g. Standard course reading">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-issue')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Confirm Issue</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: Return Book & Settle Fine -->
+  <dialog id="modal-return">
+    <div class="modal-header">
+      <h3>Return Book (Checkin)</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-return')">&times;</button>
+    </div>
+    <form id="return-form">
+      <input type="hidden" id="return-borrow-id">
+      <div class="modal-body">
+        <p style="margin-bottom:0.75rem;">
+          Return title: <strong id="return-book-name"></strong><br>
+          Patron: <strong id="return-member-name"></strong><br>
+          Scheduled Due Date: <span id="return-due-date"></span>
+        </p>
+
+        <div id="return-fine-notice" style="display:none; background:var(--danger-light); border:1px solid var(--danger-border); padding:0.85rem; border-radius:8px; margin-bottom:1rem; color:#991b1b;">
+          <strong>⚠️ Overdue Return Fine:</strong>
+          <div id="return-fine-amount" style="font-size:1.15rem; font-weight:700; margin-top:0.25rem;">$0.00</div>
+          <p style="font-size:0.775rem; margin-top:0.25rem;">Rate: $0.50 per day past due date.</p>
+        </div>
+
+        <div id="return-pay-fine-group" class="form-group" style="display:none;">
+          <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+            <input type="checkbox" id="return-pay-fine-checkbox">
+            <span>Settle fine payment immediately</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="return-notes">Inspection Condition / Return Note</label>
+          <input type="text" id="return-notes" class="form-control" placeholder="Book in good condition">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-return')">Cancel</button>
+        <button type="submit" class="btn btn-success">Confirm Return</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: Register Patron (Admin) -->
+  <dialog id="modal-member">
+    <div class="modal-header">
+      <h3>Register New Patron</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-member')">&times;</button>
+    </div>
+    <form id="member-form">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="member-name-input">Full Name *</label>
+          <input type="text" id="member-name-input" class="form-control" required placeholder="Jane Doe">
+        </div>
+        <div class="form-group">
+          <label for="member-email-input">Email Address *</label>
+          <input type="email" id="member-email-input" class="form-control" required placeholder="jane@example.com">
+        </div>
+        <div class="form-group">
+          <label for="member-pass-input">Default Password *</label>
+          <input type="password" id="member-pass-input" class="form-control" required value="member123">
+        </div>
+        <div class="form-group">
+          <label for="member-phone-input">Phone Number (optional)</label>
+          <input type="tel" id="member-phone-input" class="form-control" placeholder="+1 555-0123">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-member')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Register Patron</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
