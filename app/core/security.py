@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 import bcrypt
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Query, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -47,16 +47,18 @@ def decode_access_token(token: str) -> Optional[TokenData]:
 
 def get_current_user(
     token: Optional[str] = Depends(oauth2_scheme),
+    token_query: Optional[str] = Query(None, alias="token"),
     db: Session = Depends(get_db)
 ) -> User:
+    auth_token = token or token_query
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    if not token:
+    if not auth_token:
         raise credentials_exception
-    token_data = decode_access_token(token)
+    token_data = decode_access_token(auth_token)
     if token_data is None or token_data.user_id is None:
         raise credentials_exception
     user = db.query(User).filter(User.id == token_data.user_id).first()
@@ -66,11 +68,13 @@ def get_current_user(
 
 def get_optional_user(
     token: Optional[str] = Depends(oauth2_scheme),
+    token_query: Optional[str] = Query(None, alias="token"),
     db: Session = Depends(get_db)
 ) -> Optional[User]:
-    if not token:
+    auth_token = token or token_query
+    if not auth_token:
         return None
-    token_data = decode_access_token(token)
+    token_data = decode_access_token(auth_token)
     if token_data is None or token_data.user_id is None:
         return None
     return db.query(User).filter(User.id == token_data.user_id).first()

@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.database import init_db
+from app.database import init_db, ensure_db_ready
 from app.seed import seed_data
 from app.api import (
     auth_router,
@@ -19,9 +19,8 @@ from app.api import (
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Ensure database is initialized and seeded with default data
-    init_db()
-    seed_data()
+    # Ensure database is initialized and seeded
+    ensure_db_ready()
     yield
 
 app = FastAPI(
@@ -48,16 +47,27 @@ app.include_router(members_router)
 app.include_router(analytics_router)
 app.include_router(export_router)
 
-# Mount static assets
+# Static files path
 static_path = os.path.join(os.path.dirname(__file__), "app", "static")
 if os.path.exists(static_path):
     app.mount("/static", StaticFiles(directory=static_path), name="static")
 
-@app.get("/", include_in_schema=False)
+@app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
 async def serve_index():
     return FileResponse(os.path.join(static_path, "index.html"))
 
-@app.get("/health", tags=["System"])
+@app.api_route("/favicon.ico", methods=["GET", "HEAD"], include_in_schema=False)
+async def serve_favicon_ico():
+    ico_path = os.path.join(static_path, "favicon.ico")
+    if os.path.exists(ico_path):
+        return FileResponse(ico_path, media_type="image/x-icon")
+    return FileResponse(os.path.join(static_path, "favicon.svg"), media_type="image/svg+xml")
+
+@app.api_route("/favicon.svg", methods=["GET", "HEAD"], include_in_schema=False)
+async def serve_favicon_svg():
+    return FileResponse(os.path.join(static_path, "favicon.svg"), media_type="image/svg+xml")
+
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["System"])
 async def health_check():
     return {
         "status": "healthy",
@@ -67,4 +77,4 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main.py:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

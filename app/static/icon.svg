@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="50%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <linearGradient id="pageGradL" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#cbd5e1" />
+      <stop offset="100%" stop-color="#f8fafc" />
+    </linearGradient>
+    <linearGradient id="pageGradR" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e2e8f0" />
+    </linearGradient>
+    <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#fbbf24" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0f172a" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Background rounded squircle -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bgGrad)" />
+  <rect x="2.5" y="2.5" width="59" height="59" rx="13.5" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+
+  <!-- Book Pages Shadow -->
+  <path d="M12 41 C20 44 28 43 32 46 C36 43 44 44 52 41 L52 23 C44 26 36 25 32 28 C28 25 20 26 12 23 Z"
+        fill="#1e1b4b" opacity="0.4" />
+
+  <!-- Book Left Page -->
+  <path d="M12 39 C20 42 27 41 32 44 L32 26 C27 23 20 24 12 21 Z"
+        fill="url(#pageGradL)" filter="url(#shadow)" />
+
+  <!-- Book Right Page -->
+  <path d="M32 44 C37 41 44 42 52 39 L52 21 C44 24 37 23 32 26 Z"
+        fill="url(#pageGradR)" filter="url(#shadow)" />
+
+  <!-- Page lines left -->
+  <path d="M16 26 C20 27.5 24 27.5 28 28.5" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round" />
+  <path d="M16 30 C20 31.5 24 31.5 28 32.5" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round" />
+  <path d="M16 34 C20 35.5 24 35.5 28 36.5" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round" />
+
+  <!-- Page lines right -->
+  <path d="M36 28.5 C40 27.5 44 27.5 48 26" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round" />
+  <path d="M36 32.5 C40 31.5 44 31.5 48 30" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round" />
+  <path d="M36 36.5 C40 35.5 44 35.5 48 34" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round" />
+
+  <!-- Center spine line -->
+  <line x1="32" y1="26" x2="32" y2="44" stroke="#64748b" stroke-width="1.2" />
+
+  <!-- Gold Ribbon Bookmark -->
+  <path d="M30 20 L34 20 L34 32 L32 30.5 L30 32 Z" fill="url(#ribbonGrad)" filter="url(#shadow)" />
+
+  <!-- Star Sparkle -->
+  <circle cx="48" cy="14" r="1.5" fill="#fef08a" />
+  <path d="M48 11 L48 17 M45 14 L51 14" stroke="#fde047" stroke-width="1.2" stroke-linecap="round" />
+</svg>

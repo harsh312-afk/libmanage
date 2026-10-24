@@ -44,3 +44,5 @@ data/library.db
 *.swp
 *.swo
 .env
+.vercel
+

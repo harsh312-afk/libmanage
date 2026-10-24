@@ -2,79 +2,108 @@
 
 # 📚 Libraria — Full Stack Library Management System
 
+[![Deployed on Vercel](https://img.shields.io/badge/Vercel-Live%20Demo-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://libmanage-blue.vercel.app)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 [![SQLAlchemy 2.0](https://img.shields.io/badge/SQLAlchemy-2.0-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
 [![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![Tests Passing](https://img.shields.io/badge/pytest-10%20passed-success?style=for-the-badge&logo=pytest)](https://docs.pytest.org/)
+[![Tests Passing](https://img.shields.io/badge/pytest-18%20passed-success?style=for-the-badge&logo=pytest)](https://docs.pytest.org/)
 
-**A modern, production-ready, full-stack library management application with real-time circulation tracking, automated overdue fine calculation, inventory management, and an accessible responsive dashboard.**
+**A modern, production-grade library management application with real-time circulation tracking, automated overdue fine calculation, inventory controls, interactive analytics, and responsive UI.**
 
-[Features](#-key-features) • [Architecture](#-architecture) • [Quickstart](#-quickstart) • [Default Accounts](#-default-accounts) • [API Reference](#-api-reference) • [Testing](#-running-tests)
+🌐 **Live Vercel URL**: **[https://libmanage-blue.vercel.app](https://libmanage-blue.vercel.app)**  
+📖 **Interactive Swagger API Docs**: **[https://libmanage-blue.vercel.app/docs](https://libmanage-blue.vercel.app/docs)**
+
+[Live Demo](#-live-hosted-deployment) • [Key Features](#-key-features) • [Architecture](#-architecture) • [Quickstart](#-quickstart) • [Default Accounts](#-default-accounts) • [API Reference](#-api-reference) • [Testing](#-running-tests)
 
 </div>
 
 ---
 
-## 🌟 Key Features
+## 🌐 Live Hosted Deployment
 
-- **📊 Comprehensive Dashboard**: Real-time KPI summary (Total Titles, Inventory Copies, Currently Loaned, Registered Patrons, Overdue Loans, Fines Collected), dynamic activity feed, and category distribution progress bars.
-- **📖 Book Catalog & Inventory Management**:
-  - Full-text live search across Title, Author, ISBN, and Description with debouncing.
-  - Genre category filters and stock availability filter (*"In Stock Only"*).
-  - Rich modal previews with cover art, shelf rack location, synopsis, and stock status.
-  - Full CRUD for Librarians (Add, Edit, Delete with safety checks for active loans).
+The application is deployed and hosted on **Vercel** with full zero-config serverless FastAPI integration and automated SQLite database initialization:
+
+- **Production Web Application**: [https://libmanage-blue.vercel.app](https://libmanage-blue.vercel.app)
+- **Interactive OpenAPI / Swagger**: [https://libmanage-blue.vercel.app/docs](https://libmanage-blue.vercel.app/docs)
+- **Health Check Endpoint**: [https://libmanage-blue.vercel.app/health](https://libmanage-blue.vercel.app/health)
+
+> [!TIP]
+> Use the **⚡ Demo** switcher in the top navigation bar of the live hosted application to instantly switch between **Admin (Chief Librarian)** and **Patron (Student)** modes with one click.
+
+---
+
+## 🌟 Key Features & Improvements
+
+- **🎨 Custom App Icons & Vector Branding**:
+  - Custom high-resolution vector SVG icon (`favicon.svg`, `icon.svg`) featuring a digital library book with gradient layers and ribbon bookmark.
+  - Multi-resolution raster icons (`favicon.ico`, `favicon.png`, `apple-touch-icon.png`, `icon-512.png`).
+  - Native browser favicon support and PWA-ready meta tags.
+- **📊 Comprehensive Real-Time Dashboard**:
+  - Live KPI cards: Total Titles, Inventory Copies, Active Loans, Registered Patrons, Overdue Loans, and Fines Collected.
+  - Interactive click-throughs: clicking on KPI cards instantly navigates to filtered catalog or circulation views.
+  - Prominent overdue loans warning alert banner with direct resolution action.
+  - Quick action shortcuts bar right on the dashboard.
+- **📖 Enhanced Book Catalog & Inventory Management**:
+  - Real-time search across Title, Author, ISBN, and Description with debounced input.
+  - **Genre filter chips** for one-click category filtering (`All`, `Computer Science`, `Classic Literature`, etc.).
+  - **Multi-criteria sorting**: Title (A-Z / Z-A), Publication Year (Newest / Oldest), and Stock Count (High-Low).
+  - Low stock warning badges (`⚠️ Only 1 Left`) for items nearing depletion.
+  - Keyboard shortcut: Press `/` or `Ctrl+K` from anywhere to jump directly to catalog search.
+  - Full CRUD for Librarians (Add, Edit, Delete with active loan protection).
 - **🔄 Circulation Desk & Loan Automation**:
-  - Issue books with configurable loan durations (default 14 days) and borrow limit enforcement (up to 5 titles per patron).
-  - Return workflow with automated overdue fine calculation ($0.50/day).
-  - One-click fine settlement option on return.
-  - Loan renewal capabilities (up to 2 renewals before return is mandated).
-  - Live atomic inventory decrement on issue and increment on return.
+  - Live search filter inside the Circulation Desk by book title, author, patron name, or loan number.
+  - Issue books with custom loan durations (default 14 days) and patron limit enforcement (up to 5 books).
+  - Check-in / Return workflow with automated overdue fine calculation ($0.50/day).
+  - Settle overdue fine directly during book return with a single checkbox.
+  - Loan renewal counter tracking remaining renewals (up to 2 renewals allowed).
+  - Overdue status badges with relative day indicators (`Overdue (+3d)`, `Due in 2d`, `Active`).
 - **👥 Patron / Member Management**:
-  - Automatic student/patron library card number generation (`LIB-YYYY-XXXX`).
-  - Patron directory tracking active loans and account status.
+  - Directory of registered members with active loan counts.
+  - **Patron loan history modal**: view all active and past borrowings for any individual member.
+  - One-click copy for library card numbers (`LIB-YYYY-XXXX`).
   - Role-Based Access Control (**RBAC**): `admin` (Chief Librarian) vs `member` (Patron).
-- **📈 Reports & Data Export**:
-  - One-click CSV export of full book catalog inventory.
-  - One-click CSV export of historical circulation logs and fine records.
-- **🎨 Modern, Accessible Frontend**:
-  - Built with modern semantic HTML5 and CSS Custom Properties.
-  - Native `<dialog>` modal elements supporting light-dismiss outside-click behavior.
-  - Smooth Light & Dark mode toggle with preference saved in `localStorage`.
-  - Fast demo account switcher (1-click Admin or Patron login).
-- **📑 Auto-Generated Swagger & OpenAPI Docs**: Live interactive API sandbox available at `/docs`.
+- **📈 Reports & Analytics**:
+  - Genre distribution progress charts and collection share percentages.
+  - Secure CSV export for Catalog Inventory and Circulation Audit logs (supporting both Bearer tokens and direct downloads).
+- **☁️ Cloud & Serverless Ready (Vercel)**:
+  - Automatic detection of serverless environment with fallback SQLite storage in `/tmp/libraria_data`.
+  - Cold-start database initialization and automatic demo catalog seeding.
+  - Responsive mobile drawer navigation menu.
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Frontend (Web UI)                        │
-│  - Dashboard (KPI cards, activity feeds, metrics)           │
-│  - Catalog (Search, filter by genre, add/edit/delete)       │
-│  - Circulation Desk (Issue, Return with fine calc, Renew)   │
-│  - Patron Directory (Member profiles, active loans count)   │
-│  - Reports & Analytics (Genre distribution, CSV export)     │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ JSON REST API
-┌──────────────────────────────▼──────────────────────────────┐
-│                    FastAPI Backend Router                   │
-│  - /api/auth       (Login, Register, Profile, Role RBAC)    │
-│  - /api/books      (Catalog search, CRUD, inventory stock)  │
-│  - /api/borrows    (Issue, Return, Renew, Overdue tracker)  │
-│  - /api/members    (Patron management, loan history)        │
-│  - /api/analytics  (KPI metrics, circulation statistics)   │
-│  - /api/export     (CSV exports for catalog & loans)        │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ SQLAlchemy 2.0
-┌──────────────────────────────▼──────────────────────────────┐
-│                   SQLite Database Schema                    │
-│  - users           (id, name, email, password_hash, role)   │
-│  - books           (id, title, author, isbn, genre, copies) │
-│  - borrow_records  (id, user_id, book_id, dates, status)    │
-│  - fine_records    (id, borrow_id, amount, status, paid_at) │
-└─────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Frontend (Modern SPA)                           │
+│  - Dashboard: KPI cards, alert banners, quick action bar               │
+│  - Catalog: Genre chips, multi-column sort, search with / shortcut     │
+│  - Circulation Desk: Filterable loan audit table, check-in & renew     │
+│  - Patron Directory: Member profiles & individual loan history modal   │
+│  - Reports & Analytics: Collection distribution & CSV exporters        │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ JSON REST API
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                        FastAPI Backend Engine                          │
+│  - /api/auth       (JWT authentication, role verification)             │
+│  - /api/books      (Catalog search, filtering, sorting, CRUD)          │
+│  - /api/borrows    (Issue, Return with automated fines, Renewals)      │
+│  - /api/members    (Patron management, loan records)                   │
+│  - /api/analytics  (KPI metrics, collection distribution)              │
+│  - /api/export     (CSV exports for inventory & circulation)           │
+│  - /health         (System health status)                              │
+│  - /favicon.ico    (App icon endpoints)                                │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ SQLAlchemy 2.0 ORM
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                       SQLite Database Engine                           │
+│  - users           (id, name, email, password_hash, role, card_number) │
+│  - books           (id, title, author, isbn, genre, copies, rack)      │
+│  - borrow_records  (id, user_id, book_id, dates, renewal_count, status)│
+│  - fine_records    (id, borrow_id, amount, status, paid_at)            │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -93,7 +122,7 @@ git clone git@github.com:harsh312-afk/libmanage.git
 cd libmanage
 
 # Install dependencies into virtual environment
-uv sync
+uv sync --extra dev
 ```
 
 **Using standard `pip`:**
@@ -101,9 +130,10 @@ uv sync
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+pip install pytest httpx
 ```
 
-### 2. Start the Server
+### 2. Start the Local Server
 
 ```bash
 uv run python main.py
@@ -113,8 +143,7 @@ uv run python main.py
 python main.py
 ```
 
-The server automatically initializes SQLite at `data/library.db` and pre-seeds realistic sample books, patrons, active loans, and overdue records on its first launch.
-
+The application will start at:
 - **Web Application**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 - **Interactive Swagger Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - **ReDoc Documentation**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
@@ -123,7 +152,7 @@ The server automatically initializes SQLite at `data/library.db` and pre-seeds r
 
 ## 🔐 Default Accounts
 
-You can log in manually or use the **⚡ Quick Demo** buttons in the Sign In dialog:
+Test the application using the **⚡ Quick Demo** buttons in the header / sign-in dialog, or log in manually:
 
 | Role | Email | Password | Library Card Number | Access Level |
 | :--- | :--- | :--- | :--- | :--- |
@@ -158,7 +187,7 @@ You can log in manually or use the **⚡ Quick Demo** buttons in the Sign In dia
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/borrows` | List loan records (filtered by status or user) | Bearer Token |
 | `POST` | `/api/borrows` | Issue a book to a patron | Bearer Token |
-| `POST` | `/api/borrows/{id}/return`| Return a borrowed book & compute overdue fine | Bearer Token |
+| `POST` | `/api/borrows/{id}/return` | Return a borrowed book & compute overdue fine | Bearer Token |
 | `POST` | `/api/borrows/{id}/renew` | Renew loan for an additional 14 days | Bearer Token |
 | `POST` | `/api/borrows/{id}/pay-fine` | Settle outstanding overdue fine | Admin |
 
@@ -182,16 +211,18 @@ You can log in manually or use the **⚡ Quick Demo** buttons in the Sign In dia
 
 ## 🧪 Running Tests
 
-A comprehensive test suite is included in `tests/` utilizing an in-memory SQLite database:
+The test suite runs with an isolated in-memory SQLite database:
 
 ```bash
-uv run pytest -v
+uv run --extra dev pytest -v
 ```
 
-### What is tested:
-- **Authentication**: Registration, password verification, token generation, and invalid credential handling.
-- **Book Management**: Catalog search queries, genre filtering, stock limits, and role authorization.
-- **Circulation Rules**: Issue workflow, stock decrement, prevention of duplicate active loans for the same book, returns, stock restock, loan renewal limits, and automated overdue fine calculations.
+### Coverage (18 passing tests):
+- **Authentication**: Registration, password verification, token generation, profile fetching, and invalid credentials.
+- **Book Catalog**: Search queries, category filters, inventory copy tracking, and admin authorization.
+- **Circulation Rules**: Issue workflow, stock decrement, prevention of duplicate active loans, return workflow, stock restock, loan renewals limit (max 2), and automated fine calculations.
+- **CSV Data Export**: Export generation with Bearer authorization headers and query token verification.
+- **System**: Health check, custom SVG/ICO favicon endpoints, and index shell serving.
 
 ---
 
@@ -201,13 +232,13 @@ uv run pytest -v
 ├── app/
 │   ├── api/                    # REST API route controllers
 │   │   ├── auth.py             # User authentication & registration
-│   │   ├── books.py            # Book catalog CRUD & search
+│   │   ├── books.py            # Book catalog CRUD, search, filter
 │   │   ├── borrows.py          # Circulation: issue, return, renew
-│   │   ├── members.py          # Patron management
+│   │   ├── members.py          # Patron directory
 │   │   ├── analytics.py        # Dashboard stats aggregation
-│   │   └── export.py           # CSV data exporters
+│   │   └── export.py           # CSV data exporters (books & loans)
 │   ├── core/                   # Application core modules
-│   │   ├── config.py           # Settings and circulation rules
+│   │   ├── config.py           # Settings, rules, and serverless path fallback
 │   │   ├── security.py         # Passwords, JWT, and auth dependencies
 │   │   └── utils.py            # Standard UTC datetime helper
 │   ├── models/                 # SQLAlchemy 2.0 ORM models
@@ -223,21 +254,26 @@ uv run pytest -v
 │   │   ├── circulation_service.py # Circulation rules and fines
 │   │   └── analytics_service.py   # KPI metrics calculations
 │   ├── static/                 # Single-page frontend application
+│   │   ├── favicon.svg         # Modern vector brand SVG icon
+│   │   ├── favicon.ico         # Multi-size favicon
+│   │   ├── apple-touch-icon.png# iOS touch icon
 │   │   ├── css/style.css       # Clean design system & dark theme
 │   │   ├── js/app.js           # Frontend controller and API client
 │   │   └── index.html          # Semantic HTML5 application shell
-│   ├── database.py             # SQLite engine and session factory
+│   ├── database.py             # SQLite engine with auto-initialization
 │   └── seed.py                 # Realistic sample catalog seeder
-├── tests/                      # Automated test suite
+├── tests/                      # Automated test suite (18 tests)
 │   ├── conftest.py             # Pytest fixtures & in-memory SQLite DB
 │   ├── test_auth.py            # Authentication tests
 │   ├── test_books.py           # Catalog & search tests
-│   └── test_circulation.py     # Loan & fine calculation tests
+│   ├── test_circulation.py     # Loan & fine calculation tests
+│   ├── test_export.py          # CSV export authorization tests
+│   └── test_system.py          # Favicon & system health tests
 ├── pyproject.toml              # Build system & dependency specifications
-├── requirements.txt            # Pinned requirements
-├── main.py                     # Application entrypoint
+├── requirements.txt            # Production runtime dependencies
+├── main.py                     # Application entrypoint & static mounting
 ├── .gitignore                  # Git ignore definitions
-└── README.md                   # Project documentation
+└── README.md                   # Project documentation & live links
 ```
 
 ---

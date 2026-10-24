@@ -1,9 +1,21 @@
 import os
+import tempfile
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-DATA_DIR = BASE_DIR / "data"
-DATA_DIR.mkdir(exist_ok=True)
+
+# On Vercel or read-only serverless environments, store database in /tmp
+is_serverless = os.getenv("VERCEL") is not None or not os.access(BASE_DIR, os.W_OK)
+if is_serverless:
+    DATA_DIR = Path(tempfile.gettempdir()) / "libraria_data"
+else:
+    DATA_DIR = BASE_DIR / "data"
+
+try:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    DATA_DIR = Path(tempfile.gettempdir())
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 class Settings:
     PROJECT_NAME: str = "Libraria"

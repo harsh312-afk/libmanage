@@ -3,15 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Libraria — Modern Full-Stack Library Management</title>
+  <title>Libraria — Modern Full-Stack Library Management System</title>
+  <meta name="description" content="Production-ready library management application with real-time circulation tracking, automated overdue fine calculation, and analytics.">
+  <meta name="theme-color" content="#4f46e5">
+
+  <!-- Application Icons -->
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="alternate icon" type="image/x-icon" href="/static/favicon.ico">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+
+  <!-- Styles -->
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
 
+  <!-- Mobile Top Bar for small screens -->
+  <div class="mobile-nav-header">
+    <div class="brand-header-flex">
+      <img src="/static/favicon.svg" alt="Libraria Logo" class="brand-logo-img" width="32" height="32">
+      <span class="brand-title-mobile">Libraria</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:0.5rem;">
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">🌙</button>
+      <button id="mobile-menu-toggle" class="mobile-toggle-btn" aria-label="Toggle Navigation Menu">☰</button>
+    </div>
+  </div>
+
   <!-- Sidebar Navigation -->
-  <aside class="sidebar">
+  <aside id="app-sidebar" class="sidebar">
     <div class="sidebar-header">
-      <div class="brand-icon">📚</div>
+      <div class="brand-icon">
+        <img src="/static/favicon.svg" alt="Libraria Logo" width="36" height="36" class="brand-logo-img">
+      </div>
       <div class="brand-text">
         <h1>Libraria</h1>
         <span>Library Management System</span>
@@ -52,8 +75,12 @@
     </ul>
 
     <div class="sidebar-footer">
-      <div>FastAPI + SQLAlchemy 2.0</div>
-      <div style="font-size:0.725rem; color:#64748b;">SQLite • Modern Web UI</div>
+      <div class="tech-badge">
+        <span class="status-dot"></span> FastAPI + SQLite
+      </div>
+      <div style="font-size:0.725rem; color:var(--text-muted); margin-top:0.25rem;">
+        SQLAlchemy 2.0 • REST API
+      </div>
     </div>
   </aside>
 
@@ -62,16 +89,25 @@
 
     <!-- Top Navigation Bar -->
     <header class="top-bar">
-      <h2 id="page-title" class="page-title">Library Overview & Metrics</h2>
+      <div class="top-bar-left">
+        <h2 id="page-title" class="page-title">Library Overview & Metrics</h2>
+      </div>
 
       <div class="top-actions">
-        <!-- Quick Action: Add Book (Admin) -->
+        <!-- Quick Demo Account Switcher -->
+        <div class="quick-demo-wrapper" title="Instantly test features as Chief Librarian or Patron">
+          <span class="demo-tag">⚡ Demo:</span>
+          <button type="button" class="btn-demo-pill" onclick="quickLogin('admin')">Admin</button>
+          <button type="button" class="btn-demo-pill" onclick="quickLogin('member')">Patron</button>
+        </div>
+
+        <!-- Quick Action: Add Book (Admin Only) -->
         <button class="btn btn-primary btn-sm admin-only" onclick="openAddBook()" style="display:none;">
           <span>➕</span> Add Book
         </button>
 
         <!-- Theme Toggle -->
-        <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+        <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
           🌙
         </button>
 
@@ -96,9 +132,41 @@
 
       <!-- 1. DASHBOARD VIEW -->
       <section id="view-dashboard" class="main-view active">
-        <!-- KPI Cards -->
+        <!-- Overdue Alert Banner -->
+        <div id="dashboard-overdue-alert" class="alert-banner alert-warning" style="display:none;">
+          <div class="alert-banner-content">
+            <span class="alert-icon">⚠️</span>
+            <div>
+              <strong>Circulation Attention:</strong>
+              <span id="dashboard-overdue-msg">Overdue loans pending return.</span>
+            </div>
+          </div>
+          <button class="btn btn-warning btn-sm" onclick="filterOverdueLoans()">Review Overdue Loans →</button>
+        </div>
+
+        <!-- Quick Shortcuts Bar -->
+        <div class="dashboard-quick-actions">
+          <div class="quick-actions-label">Quick Actions:</div>
+          <button class="btn btn-outline btn-sm admin-only" onclick="openAddBook()" style="display:none;">
+            <span>➕</span> Add Title
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="switchTab('catalog')">
+            <span>🔍</span> Browse Catalog
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="switchTab('circulation')">
+            <span>🔄</span> Circulation Desk
+          </button>
+          <button class="btn btn-outline btn-sm admin-only" onclick="openAddMember()" style="display:none;">
+            <span>👥</span> Register Patron
+          </button>
+          <button class="btn btn-outline btn-sm admin-only" onclick="switchTab('analytics')" style="display:none;">
+            <span>📥</span> Export CSV Reports
+          </button>
+        </div>
+
+        <!-- KPI Cards Grid -->
         <div class="stats-grid">
-          <div class="stat-card">
+          <div class="stat-card clickable-card" onclick="switchTab('catalog')">
             <div class="stat-info">
               <span>Total Titles</span>
               <h3 id="stat-total-books">0</h3>
@@ -114,7 +182,7 @@
             <div class="stat-icon-wrapper icon-green">📦</div>
           </div>
 
-          <div class="stat-card">
+          <div class="stat-card clickable-card" onclick="switchTab('circulation')">
             <div class="stat-info">
               <span>Currently Loaned</span>
               <h3 id="stat-issued">0</h3>
@@ -122,7 +190,7 @@
             <div class="stat-icon-wrapper icon-amber">📤</div>
           </div>
 
-          <div class="stat-card">
+          <div class="stat-card clickable-card admin-only" onclick="switchTab('members')" style="display:none;">
             <div class="stat-info">
               <span>Registered Patrons</span>
               <h3 id="stat-members">0</h3>
@@ -130,7 +198,7 @@
             <div class="stat-icon-wrapper icon-blue">👥</div>
           </div>
 
-          <div class="stat-card">
+          <div class="stat-card clickable-card" onclick="filterOverdueLoans()">
             <div class="stat-info">
               <span>Overdue Loans</span>
               <h3 id="stat-overdue">0</h3>
@@ -138,7 +206,7 @@
             <div class="stat-icon-wrapper icon-rose">⚠️</div>
           </div>
 
-          <div class="stat-card">
+          <div class="stat-card clickable-card" onclick="switchTab('analytics')">
             <div class="stat-info">
               <span>Fines Collected</span>
               <h3 id="stat-fines">$0.00</h3>
@@ -148,7 +216,7 @@
         </div>
 
         <!-- Split Grid: Recent Activity & Categories -->
-        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem;">
+        <div class="dashboard-split-grid">
           
           <div class="card">
             <div class="card-header">
@@ -192,7 +260,8 @@
         <div class="toolbar">
           <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="search" id="catalog-search-input" placeholder="Search by title, author, or ISBN...">
+            <input type="search" id="catalog-search-input" placeholder="Search by title, author, or ISBN... (Press / to focus)">
+            <kbd class="search-kbd">/</kbd>
           </div>
 
           <div class="filter-group">
@@ -200,7 +269,16 @@
               <option value="">All Categories</option>
             </select>
 
-            <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.875rem; cursor:pointer;">
+            <select id="catalog-sort-select" class="select-input" onchange="sortAndRenderBooks()">
+              <option value="default">Sort: Recommended</option>
+              <option value="title_asc">Title: A to Z</option>
+              <option value="title_desc">Title: Z to A</option>
+              <option value="year_desc">Year: Newest First</option>
+              <option value="year_asc">Year: Oldest First</option>
+              <option value="copies_desc">Stock: Most Copies</option>
+            </select>
+
+            <label class="checkbox-label">
               <input type="checkbox" id="catalog-available-only" onchange="searchBooks()">
               <span>In Stock Only</span>
             </label>
@@ -211,6 +289,19 @@
           </div>
         </div>
 
+        <!-- Genre Quick Filter Pills -->
+        <div id="catalog-category-chips" class="genre-chips-container">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Catalog Results Summary -->
+        <div class="catalog-status-bar">
+          <span id="catalog-results-count" style="font-size:0.875rem; color:var(--text-muted);">Loading catalog...</span>
+          <button id="catalog-clear-btn" class="btn btn-link btn-sm" onclick="clearCatalogFilters()" style="display:none;">
+            Clear Filters ✕
+          </button>
+        </div>
+
         <div id="book-grid-container" class="book-grid">
           <!-- Populated dynamically -->
         </div>
@@ -219,16 +310,25 @@
       <!-- 3. CIRCULATION VIEW -->
       <section id="view-circulation" class="main-view">
         <div class="card">
-          <div class="card-header">
+          <div class="card-header" style="flex-wrap:wrap; gap:0.75rem;">
             <span class="card-title">Circulation & Loan Records</span>
-            <div class="filter-group">
-              <label for="circulation-status-filter" style="font-size:0.85rem; font-weight:600;">Status:</label>
-              <select id="circulation-status-filter" class="select-input" onchange="loadCirculation()">
-                <option value="all">All Records</option>
-                <option value="borrowed">Active Loans</option>
-                <option value="overdue">Overdue Only</option>
-                <option value="returned">Returned History</option>
-              </select>
+            
+            <div class="circulation-filters">
+              <div class="search-box" style="min-width:240px;">
+                <span class="search-icon">🔍</span>
+                <input type="search" id="circulation-search-input" placeholder="Filter loans by book or patron..." oninput="filterCirculationList()">
+              </div>
+
+              <div class="filter-group">
+                <label for="circulation-status-filter" style="font-size:0.85rem; font-weight:600;">Status:</label>
+                <select id="circulation-status-filter" class="select-input" onchange="loadCirculation()">
+                  <option value="all">All Records</option>
+                  <option value="borrowed">Active Loans</option>
+                  <option value="overdue">Overdue Only</option>
+                  <option value="returned">Returned History</option>
+                </select>
+                <button class="btn btn-secondary btn-sm" onclick="loadCirculation()" title="Refresh records">🔄</button>
+              </div>
             </div>
           </div>
           <div class="card-body" style="padding:0;">
@@ -259,7 +359,7 @@
         <div class="toolbar">
           <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="search" id="members-search-input" placeholder="Search patrons by name, email, or card number...">
+            <input type="search" id="members-search-input" placeholder="Search patrons by name, email, card number...">
           </div>
           <button class="btn btn-primary btn-sm" onclick="openAddMember()">
             ➕ Register Patron
@@ -278,6 +378,7 @@
                     <th>Phone</th>
                     <th>Active Loans</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="members-tbody">
@@ -291,32 +392,78 @@
 
       <!-- 5. ANALYTICS & EXPORT VIEW -->
       <section id="view-analytics" class="main-view">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Export Library Reports</span>
+        
+        <!-- Summary Metric Cards for Analytics -->
+        <div class="stats-grid" style="margin-bottom:1.5rem;">
+          <div class="stat-card">
+            <div class="stat-info">
+              <span>Total Catalog Titles</span>
+              <h3 id="analytics-total-books">0</h3>
+            </div>
+            <div class="stat-icon-wrapper icon-blue">📚</div>
           </div>
-          <div class="card-body" style="display:flex; gap:1rem; flex-wrap:wrap;">
-            <div style="flex:1; min-width:260px; padding:1.25rem; border:1px solid var(--border-color); border-radius:8px;">
-              <h4>Catalog Inventory Report</h4>
-              <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0 1rem 0;">
-                Export all books, ISBNs, shelf locations, and total copy counts in CSV format.
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <span>Total Inventory Copies</span>
+              <h3 id="analytics-total-copies">0</h3>
+            </div>
+            <div class="stat-icon-wrapper icon-green">📦</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <span>Currently Loaned</span>
+              <h3 id="analytics-issued-copies">0</h3>
+            </div>
+            <div class="stat-icon-wrapper icon-amber">📤</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <span>Unpaid / Pending Fines</span>
+              <h3 id="analytics-fines-pending">$0.00</h3>
+            </div>
+            <div class="stat-icon-wrapper icon-rose">⏳</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <span>Total Fines Settled</span>
+              <h3 id="analytics-fines-paid">$0.00</h3>
+            </div>
+            <div class="stat-icon-wrapper icon-green">💵</div>
+          </div>
+        </div>
+
+        <!-- Export Data Cards -->
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-header">
+            <span class="card-title">Export Library Reports & Audit Logs</span>
+          </div>
+          <div class="card-body" style="display:flex; gap:1.25rem; flex-wrap:wrap;">
+            <div class="export-box">
+              <h4>📚 Catalog Inventory Report</h4>
+              <p>
+                Export all books, ISBNs, genre categories, publication years, shelf locations, and total vs available copy counts in standard CSV format.
               </p>
               <button class="btn btn-primary btn-sm" onclick="exportData('books')">📥 Download Books CSV</button>
             </div>
 
-            <div style="flex:1; min-width:260px; padding:1.25rem; border:1px solid var(--border-color); border-radius:8px;">
-              <h4>Circulation & Fines Audit</h4>
-              <p style="font-size:0.85rem; color:var(--text-muted); margin:0.5rem 0 1rem 0;">
-                Export historical borrow records, return dates, overdue calculations, and fine payment status.
+            <div class="export-box">
+              <h4>🔄 Circulation & Fines Audit</h4>
+              <p>
+                Export historical borrow records, checkout and due dates, actual return timestamps, overdue days, and fine payment audit details.
               </p>
               <button class="btn btn-primary btn-sm" onclick="exportData('borrows')">📥 Download Circulation CSV</button>
             </div>
           </div>
         </div>
 
+        <!-- Category Distribution Table -->
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Catalog Breakdown by Category</span>
+            <span class="card-title">Catalog Breakdown by Category / Genre</span>
           </div>
           <div class="card-body" style="padding:0;">
             <div class="table-responsive">
@@ -325,7 +472,7 @@
                   <tr>
                     <th>Category / Genre</th>
                     <th>Number of Titles</th>
-                    <th>Percentage of Collection</th>
+                    <th>Share of Collection</th>
                   </tr>
                 </thead>
                 <tbody id="analytics-category-tbody">
@@ -353,11 +500,12 @@
     </div>
     <form id="login-form">
       <div class="modal-body">
-        <div style="background:var(--primary-light); padding:0.85rem; border-radius:8px; margin-bottom:1.25rem; font-size:0.825rem;">
-          <strong>⚡ Quick Demo Accounts:</strong>
-          <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-            <button type="button" class="btn btn-primary btn-sm" onclick="quickLogin('admin')">Login as Admin</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('member')">Login as Patron</button>
+        <div class="quick-demo-box">
+          <strong>⚡ One-Click Demo Access:</strong>
+          <p style="font-size:0.775rem; color:var(--text-muted); margin:0.25rem 0 0.5rem 0;">Test librarian administrative features or patron self-service:</p>
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="quickLogin('admin')">Login as Admin (Librarian)</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('member')">Login as Patron (Alice)</button>
           </div>
         </div>
 
@@ -384,23 +532,23 @@
       <button class="modal-close-btn" onclick="closeModal('modal-book-detail')">&times;</button>
     </div>
     <div class="modal-body" style="display:flex; gap:1.5rem; flex-wrap:wrap;">
-      <div style="width:160px; height:230px; flex-shrink:0; border-radius:8px; overflow:hidden; background:#1e293b;">
-        <img id="detail-book-cover" src="" alt="Book Cover" style="width:100%; height:100%; object-fit:cover;">
+      <div class="book-detail-cover-box">
+        <img id="detail-book-cover" src="" alt="Book Cover" class="book-detail-cover">
       </div>
       <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:0.4rem; font-size:0.9rem;">
-        <p id="detail-book-author" style="font-weight:600; color:var(--text-muted);"></p>
-        <p><strong>ISBN:</strong> <span id="detail-book-isbn"></span></p>
-        <p><strong>Genre:</strong> <span id="detail-book-category"></span></p>
+        <p id="detail-book-author" style="font-weight:600; color:var(--text-muted); font-size:1rem;"></p>
+        <p><strong>ISBN:</strong> <code id="detail-book-isbn"></code></p>
+        <p><strong>Genre:</strong> <span id="detail-book-category" class="badge badge-primary"></span></p>
         <p><strong>Publication Year:</strong> <span id="detail-book-year"></span></p>
-        <p><strong>Shelf Location:</strong> <span id="detail-book-location"></span></p>
+        <p><strong>Shelf Rack Location:</strong> <span id="detail-book-location" style="font-weight:600;"></span></p>
         <p><strong>Stock Status:</strong> <span id="detail-book-copies" style="font-weight:600; color:var(--success);"></span></p>
         <hr style="border:none; border-top:1px solid var(--border-color); margin:0.5rem 0;">
-        <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.4;" id="detail-book-desc"></p>
+        <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.5;" id="detail-book-desc"></p>
       </div>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" onclick="closeModal('modal-book-detail')">Close</button>
-      <button type="button" id="detail-issue-btn" class="btn btn-primary">Issue Book</button>
+      <button type="button" id="detail-issue-btn" class="btn btn-primary">Issue This Book</button>
     </div>
   </dialog>
 
@@ -495,7 +643,7 @@
   <!-- Modal: Return Book & Settle Fine -->
   <dialog id="modal-return">
     <div class="modal-header">
-      <h3>Return Book (Checkin)</h3>
+      <h3>Return Book (Check-in)</h3>
       <button class="modal-close-btn" onclick="closeModal('modal-return')">&times;</button>
     </div>
     <form id="return-form">
@@ -564,6 +712,36 @@
     </form>
   </dialog>
 
+  <!-- Modal: View Patron Loans -->
+  <dialog id="modal-patron-loans" style="max-width:680px;">
+    <div class="modal-header">
+      <h3 id="patron-loans-title">Patron Loans</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-patron-loans')">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:0;">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Borrowed</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="patron-loans-tbody">
+            <!-- Loaded dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('modal-patron-loans')">Close</button>
+    </div>
+  </dialog>
+
+  <!-- Scripts -->
   <script src="/static/js/app.js"></script>
 </body>
 </html>
